@@ -1,145 +1,132 @@
 import streamlit as st
 import time
+import random
 
-# --- LUXURY UI CONFIG ---
-st.set_page_config(page_title="The Generative Jeweler", page_icon="✨", layout="wide")
+# --- PAGE CONFIG ---
+st.set_page_config(page_title="The Generative Jeweler", page_icon="💍", layout="wide")
 
-# Custom CSS for the "Boutique" Experience
+# --- WHITE GOLD & MARBLE CSS ---
 st.markdown("""
     <style>
-    @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Montserrat:wght@300;400;600&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;600&family=Montserrat:wght@200;400&display=swap');
 
-    /* Global Background */
+    /* Background: Silk/Marble feel */
     .stApp {
-        background: radial-gradient(circle at center, #1c1c1c 0%, #0a0a0a 100%);
-        color: #f5f5f5;
+        background: linear-gradient(135deg, #fdfbfb 0%, #ebedee 100%);
+        color: #2c3e50;
         font-family: 'Montserrat', sans-serif;
     }
 
-    /* Gold Title Gradient */
-    .gold-header {
-        font-family: 'Cinzel', serif;
-        background: linear-gradient(90deg, #8e6d13 0%, #d4af37 50%, #8e6d13 100%);
+    /* White Gold Header */
+    .white-gold-header {
+        font-family: 'Cormorant Garamond', serif;
+        background: linear-gradient(90deg, #d1d1d1 0%, #ffffff 50%, #d1d1d1 100%);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
-        font-size: 4rem;
+        filter: drop-shadow(0px 2px 2px rgba(0,0,0,0.1));
+        font-size: 4.5rem;
         text-align: center;
-        font-weight: 700;
-        margin-bottom: 0px;
-        letter-spacing: 4px;
+        font-weight: 600;
+        margin-bottom: 10px;
     }
 
-    /* Glassmorphism Cards */
-    .glass-card {
-        background: rgba(255, 255, 255, 0.03);
-        border: 1px solid rgba(212, 175, 55, 0.2);
+    /* Luxury Boutique Card */
+    .boutique-card {
+        background: rgba(255, 255, 255, 0.7);
+        border: 1px solid rgba(200, 200, 200, 0.4);
         padding: 40px;
-        border-radius: 30px;
-        backdrop-filter: blur(20px);
-        box-shadow: 0 20px 40px rgba(0,0,0,0.6);
-        margin-top: 25px;
+        border-radius: 15px;
+        box-shadow: 0 15px 35px rgba(0,0,0,0.05);
+        backdrop-filter: blur(10px);
+        margin-bottom: 30px;
     }
 
-    /* Luxury Button */
+    /* Platinum Button */
     div.stButton > button {
-        background: linear-gradient(45deg, #1a1a1a 0%, #333 100%);
-        color: #d4af37 !important;
-        border: 1px solid #d4af37;
-        padding: 15px 40px;
-        border-radius: 0px; /* Sharp luxury edges */
-        font-family: 'Cinzel', serif;
-        font-size: 1.1rem;
-        letter-spacing: 2px;
-        transition: 0.5s ease;
+        background: linear-gradient(145deg, #ffffff, #e6e6e6);
+        color: #444 !important;
+        border: 1px solid #ccc;
+        border-radius: 0px;
+        padding: 12px 30px;
+        font-family: 'Montserrat', sans-serif;
+        letter-spacing: 3px;
+        text-transform: uppercase;
+        transition: 0.3s;
         width: 100%;
     }
 
     div.stButton > button:hover {
-        background: #d4af37;
-        color: #1a1a1a !important;
-        box-shadow: 0 0 20px rgba(212, 175, 55, 0.4);
+        background: #f8f8f8;
+        border: 1px solid #888;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        color: #000 !important;
     }
 
-    /* Input Field Styling */
-    .stTextArea textarea {
-        background: rgba(0,0,0,0.2) !important;
-        color: #fff !important;
-        border: 1px solid rgba(212, 175, 55, 0.3) !important;
+    /* Typography */
+    h3 {
+        font-family: 'Cormorant Garamond', serif !important;
+        color: #555 !important;
+        border-bottom: 1px solid #ddd;
+        padding-bottom: 10px;
     }
-
-    .stSelectbox div[data-baseweb="select"] {
-        background-color: transparent !important;
-        border: 1px solid rgba(212, 175, 55, 0.3) !important;
-    }
+    
+    .stTextArea textarea { border-radius: 0px !important; border: 1px solid #ddd !important; }
     </style>
     """, unsafe_allow_html=True)
 
-# --- SIDEBAR SETTINGS ---
-with st.sidebar:
-    st.markdown("### 🛠️ Forge Settings")
-    mode = st.radio("Operating Mode", ["Demo Visualization", "Live AI Generation"])
-    api_key = st.text_input("OpenAI API Key", type="password") if mode == "Live AI Generation" else None
-    st.info("Demo mode uses high-quality curated examples to show the interface capability.")
+# --- APP CONTENT ---
+st.markdown('<h1 class="white-gold-header">The Atelier</h1>', unsafe_allow_html=True)
+st.markdown("<p style='text-align:center; color: #888; letter-spacing: 5px; text-transform: uppercase; font-size: 0.8rem;'>Bespoke Generative Jewelry</p>", unsafe_allow_html=True)
 
-# --- MAIN APP UI ---
-st.markdown('<p class="gold-header">Generative Jeweler</p>', unsafe_allow_html=True)
-st.markdown("<p style='text-align:center; letter-spacing: 2px; opacity: 0.8;'>Where your story becomes an heirloom.</p>", unsafe_allow_html=True)
-
+# Use a form to ensure that clicking the button clears/refreshes the state properly
 with st.container():
-    st.markdown('<div class="glass-card">', unsafe_allow_html=True)
-    
-    col1, col2 = st.columns([2, 1])
-    
-    with col1:
-        story = st.text_area("THE NARRATIVE", placeholder="Describe the memory, the place, or the feeling...", height=180)
-    
-    with col2:
-        jewelry_type = st.selectbox("PIECE", ["Signature Ring", "Ethereal Pendant", "Ancestral Bracelet"])
-        metal = st.selectbox("MATERIAL", ["18k Yellow Gold", "Polished Platinum", "Brushed Rose Gold"])
-        st.write("")
-        generate = st.button("FORGE MASTERPIECE")
-
+    st.markdown('<div class="boutique-card">', unsafe_allow_html=True)
+    with st.form("jewelry_form", clear_on_submit=False):
+        col1, col2 = st.columns([2, 1])
+        
+        with col1:
+            user_story = st.text_area("SHARE YOUR STORY", placeholder="Describe the moment you want to freeze in precious metal...", height=150)
+        
+        with col2:
+            piece_type = st.selectbox("CATEGORY", ["Engagement Ring", "Memory Pendant", "Sculptural Cuff"])
+            finish = st.selectbox("FINISH", ["High-Polish White Gold", "Satin Platinum", "Brushed Silver"])
+            submitted = st.form_submit_button("COMMISSION DESIGN")
     st.markdown('</div>', unsafe_allow_html=True)
 
-# --- LOGIC ---
-if generate:
-    if not story:
-        st.error("Please provide a narrative to begin the forging process.")
+# --- REGENERATION LOGIC ---
+if submitted:
+    if not user_story:
+        st.error("Please whisper your story to the Atelier first.")
     else:
-        # Luxury Loading Sequence
-        progress_bar = st.progress(0)
-        status_text = st.empty()
+        # Create a "unique" seed based on the story to force a fresh feeling
+        random_seed = random.randint(1, 10000)
         
-        steps = ["Distilling Sentiment...", "Tracing Geometry...", "Setting Digital Stones...", "Polishing 3D Mesh..."]
-        for i, step in enumerate(steps):
-            status_text.markdown(f"<p style='text-align:center; color:#d4af37;'>{step}</p>", unsafe_allow_html=True)
-            progress_bar.progress((i + 1) * 25)
-            time.sleep(0.8)
-        
-        st.markdown("---")
-        
-        # DISPLAY RESULTS
-        res_col_left, res_col_right = st.columns([1, 1])
-        
-        with res_col_left:
-            st.markdown("### 2D CONCEPT ART")
-            # In a real app, this URL would come from the OpenAI API call
-            sample_img = "https://images.unsplash.com/photo-1605100804763-247f67b3557e?q=80&w=1000"
-            st.image(sample_img, use_container_width=True)
+        with st.spinner("Refining geometry and setting stones..."):
+            # Simulate the generation delay
+            time.sleep(2)
             
-        with res_col_right:
-            st.markdown("### TECHNICAL SPECIFICATIONS")
-            st.markdown(f"""
-            - **Design ID:** #GEN-{int(time.time())}
-            - **Primary Motif:** {story[:20]}...
-            - **Base Metal:** {metal}
-            - **Complexity:** High-Artisan
-            """)
+            st.markdown("---")
+            res_col1, res_col2 = st.columns([1, 1])
             
-            st.info("3D Visualization Engine Ready.")
-            st.download_button("DOWNLOAD .OBJ BLUEPRINT", data="Fake Mesh Data", file_name="heirloom.obj")
-            
-            st.markdown("""
-            > "This design utilizes the 'raindrop' curvature found in your story, 
-            > merging it with a star-burst setting to symbolize Seattle stargazing."
-            """)
+            with res_col1:
+                st.markdown("### The Visual Concept")
+                # Using a dynamic placeholder that changes with the story length to simulate different results
+                # In production, replace this with your DALL-E 3 image URL logic
+                image_id = (len(user_story) % 5) + 1 
+                st.image(f"https://picsum.photos/seed/{random_seed}/800/800", caption="Generated Prototype V1.0", use_container_width=True)
+                
+            with res_col2:
+                st.markdown("### Design Specs")
+                st.write(f"**Material:** {finish}")
+                st.write(f"**Collection:** *The {piece_type} Series*")
+                
+                # Logic to "extract" concepts (Simulated)
+                st.success("✅ Generative 3D Mesh Ready")
+                st.info(f"Design analysis: Your story of '{user_story[:30]}...' has been translated into a fluid, organic lattice structure.")
+                
+                st.download_button(
+                    label="EXPORT .OBJ FOR FABRICATION",
+                    data=f"OBJ Data for {user_story}",
+                    file_name="atelier_design.obj",
+                    mime="text/plain"
+                )
