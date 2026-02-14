@@ -1,146 +1,145 @@
 import streamlit as st
 import time
-import base64
 
-# --- PAGE CONFIG ---
-st.set_page_config(page_title="The Generative Jeweler", page_icon="💎", layout="wide")
+# --- LUXURY UI CONFIG ---
+st.set_page_config(page_title="The Generative Jeweler", page_icon="✨", layout="wide")
 
-# --- LUXURY CSS ---
+# Custom CSS for the "Boutique" Experience
 st.markdown("""
     <style>
-    @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Inter:wght@300;400&display=swap');
-    
-    /* Main Background */
+    @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Montserrat:wght@300;400;600&display=swap');
+
+    /* Global Background */
     .stApp {
-        background: radial-gradient(circle at top right, #1a1a2e, #16213e, #0f0c29);
-        color: #e0e0e0;
-        font-family: 'Inter', sans-serif;
+        background: radial-gradient(circle at center, #1c1c1c 0%, #0a0a0a 100%);
+        color: #f5f5f5;
+        font-family: 'Montserrat', sans-serif;
     }
 
-    /* Gold Gradient Headers */
-    .gold-text {
-        background: linear-gradient(to right, #BF953F, #FCF6BA, #B38728, #FBF5B7, #AA771C);
+    /* Gold Title Gradient */
+    .gold-header {
+        font-family: 'Cinzel', serif;
+        background: linear-gradient(90deg, #8e6d13 0%, #d4af37 50%, #8e6d13 100%);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
-        font-family: 'Playfair Display', serif;
-        font-size: 3rem;
-        font-weight: bold;
+        font-size: 4rem;
         text-align: center;
-        margin-bottom: 0;
+        font-weight: 700;
+        margin-bottom: 0px;
+        letter-spacing: 4px;
     }
 
-    /* Glassmorphism Input Card */
-    .input-card {
+    /* Glassmorphism Cards */
+    .glass-card {
         background: rgba(255, 255, 255, 0.03);
-        border: 1px solid rgba(212, 175, 55, 0.3);
-        padding: 30px;
-        border-radius: 25px;
-        backdrop-filter: blur(15px);
-        box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-        margin-top: 20px;
+        border: 1px solid rgba(212, 175, 55, 0.2);
+        padding: 40px;
+        border-radius: 30px;
+        backdrop-filter: blur(20px);
+        box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+        margin-top: 25px;
     }
 
-    /* Custom Button */
+    /* Luxury Button */
     div.stButton > button {
-        width: 100%;
-        background: linear-gradient(45deg, #D4AF37 0%, #AA771C 100%);
-        color: white !important;
-        border: none;
-        padding: 18px;
-        border-radius: 12px;
-        font-size: 1.2rem;
-        font-weight: bold;
+        background: linear-gradient(45deg, #1a1a1a 0%, #333 100%);
+        color: #d4af37 !important;
+        border: 1px solid #d4af37;
+        padding: 15px 40px;
+        border-radius: 0px; /* Sharp luxury edges */
+        font-family: 'Cinzel', serif;
+        font-size: 1.1rem;
         letter-spacing: 2px;
-        transition: all 0.4s ease;
-        text-transform: uppercase;
+        transition: 0.5s ease;
+        width: 100%;
     }
 
     div.stButton > button:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 10px 20px rgba(212, 175, 55, 0.4);
-        border: none;
-        color: #fff !important;
+        background: #d4af37;
+        color: #1a1a1a !important;
+        box-shadow: 0 0 20px rgba(212, 175, 55, 0.4);
     }
 
-    /* Horizontal Line */
-    hr {
-        border: 0;
-        height: 1px;
-        background: linear-gradient(to right, transparent, #D4AF37, transparent);
-        margin: 40px 0;
+    /* Input Field Styling */
+    .stTextArea textarea {
+        background: rgba(0,0,0,0.2) !important;
+        color: #fff !important;
+        border: 1px solid rgba(212, 175, 55, 0.3) !important;
+    }
+
+    .stSelectbox div[data-baseweb="select"] {
+        background-color: transparent !important;
+        border: 1px solid rgba(212, 175, 55, 0.3) !important;
     }
     </style>
     """, unsafe_allow_html=True)
 
-# --- APP INTERFACE ---
+# --- SIDEBAR SETTINGS ---
+with st.sidebar:
+    st.markdown("### 🛠️ Forge Settings")
+    mode = st.radio("Operating Mode", ["Demo Visualization", "Live AI Generation"])
+    api_key = st.text_input("OpenAI API Key", type="password") if mode == "Live AI Generation" else None
+    st.info("Demo mode uses high-quality curated examples to show the interface capability.")
 
-st.markdown('<p class="gold-text">THE GENERATIVE JEWELER</p>', unsafe_allow_html=True)
-st.markdown("<p style='text-align: center; opacity: 0.7;'>Forging memories into mathematical beauty.</p>", unsafe_allow_html=True)
+# --- MAIN APP UI ---
+st.markdown('<p class="gold-header">Generative Jeweler</p>', unsafe_allow_html=True)
+st.markdown("<p style='text-align:center; letter-spacing: 2px; opacity: 0.8;'>Where your story becomes an heirloom.</p>", unsafe_allow_html=True)
 
-# Main container
 with st.container():
-    st.markdown('<div class="input-card">', unsafe_allow_html=True)
+    st.markdown('<div class="glass-card">', unsafe_allow_html=True)
     
-    col_a, col_b = st.columns([2, 1])
-    with col_a:
-        user_story = st.text_area("Tell us a story or a memory...", 
-                                 placeholder="e.g., We met in a rainy Seattle coffee shop, and our first date was stargazing at the planetarium.",
-                                 height=150)
-    with col_b:
-        jewelry_type = st.selectbox("Form Factor", ["Engagement Ring", "Solitaire Pendant", "Artisan Bracelet"])
-        metal_pref = st.select_slider("Metal Aesthetic", options=["Cool Platinum", "White Gold", "Rose Gold", "Yellow Gold"])
+    col1, col2 = st.columns([2, 1])
     
-    generate_btn = st.button("Forge Design")
+    with col1:
+        story = st.text_area("THE NARRATIVE", placeholder="Describe the memory, the place, or the feeling...", height=180)
+    
+    with col2:
+        jewelry_type = st.selectbox("PIECE", ["Signature Ring", "Ethereal Pendant", "Ancestral Bracelet"])
+        metal = st.selectbox("MATERIAL", ["18k Yellow Gold", "Polished Platinum", "Brushed Rose Gold"])
+        st.write("")
+        generate = st.button("FORGE MASTERPIECE")
+
     st.markdown('</div>', unsafe_allow_html=True)
 
-# --- GENERATION LOGIC ---
-
-if generate_btn:
-    if not user_story:
-        st.warning("Please provide a story to begin the forging process.")
+# --- LOGIC ---
+if generate:
+    if not story:
+        st.error("Please provide a narrative to begin the forging process.")
     else:
-        # 1. Extraction Animation
-        with st.status("Analyzing Sentiment & Extracting Geometry...", expanded=True) as status:
-            st.write("🔍 Identifying key symbols...")
-            time.sleep(1.5)
-            st.write("✨ Mapping 'Rainy Seattle' to *Hammered Metal Texture*...")
-            time.sleep(1)
-            st.write("🪐 Mapping 'Stargazing' to *Celestial Diamond Inlays*...")
-            status.update(label="Design Finalized!", state="complete", expanded=False)
-
-        # 2. Result Layout
-        st.markdown("---")
-        res_col1, res_col2 = st.columns([1, 1])
-
-        with res_col1:
-            st.markdown("### 2D Visual Concept")
-            # Note: Using a high-quality placeholder. 
-            # In a live app, you'd use openai.Image.create() here.
-            st.image("https://images.unsplash.com/photo-1598560912005-59a0d5c1a574?q=80&w=1000", 
-                     caption=f"Your {jewelry_type} Concept", use_container_width=True)
+        # Luxury Loading Sequence
+        progress_bar = st.progress(0)
+        status_text = st.empty()
         
-        with res_col2:
-            st.markdown("### 3D Blueprint & Specs")
+        steps = ["Distilling Sentiment...", "Tracing Geometry...", "Setting Digital Stones...", "Polishing 3D Mesh..."]
+        for i, step in enumerate(steps):
+            status_text.markdown(f"<p style='text-align:center; color:#d4af37;'>{step}</p>", unsafe_allow_html=True)
+            progress_bar.progress((i + 1) * 25)
+            time.sleep(0.8)
+        
+        st.markdown("---")
+        
+        # DISPLAY RESULTS
+        res_col_left, res_col_right = st.columns([1, 1])
+        
+        with res_col_left:
+            st.markdown("### 2D CONCEPT ART")
+            # In a real app, this URL would come from the OpenAI API call
+            sample_img = "https://images.unsplash.com/photo-1605100804763-247f67b3557e?q=80&w=1000"
+            st.image(sample_img, use_container_width=True)
             
-            # Simulation of Technical Specs
-            st.success("✅ 3D Mesh Generation Complete")
+        with res_col_right:
+            st.markdown("### TECHNICAL SPECIFICATIONS")
+            st.markdown(f"""
+            - **Design ID:** #GEN-{int(time.time())}
+            - **Primary Motif:** {story[:20]}...
+            - **Base Metal:** {metal}
+            - **Complexity:** High-Artisan
+            """)
             
-            specs = {
-                "Primary Motif": "Celestial Rain",
-                "Textural Finish": "Micro-hammered Cobalt/Platinum",
-                "Gemstone Cut": "Custom 'Coffee Bean' Marquise",
-                "Symbolism": "The fluid path of rain meeting the fixed points of stars."
-            }
+            st.info("3D Visualization Engine Ready.")
+            st.download_button("DOWNLOAD .OBJ BLUEPRINT", data="Fake Mesh Data", file_name="heirloom.obj")
             
-            for key, val in specs.items():
-                st.markdown(f"**{key}:** {val}")
-            
-            # Simulated .OBJ download
-            st.download_button(
-                label="Download .OBJ Mesh for 3D Printing",
-                data="v 0.0 0.0 0.0", # Dummy OBJ data
-                file_name="custom_jewelry.obj",
-                mime="text/plain"
-            )
-            
-            st.info("💡 **Pro Tip:** Upload this .OBJ to a service like Shapeways to print in solid 14k gold.")
+            st.markdown("""
+            > "This design utilizes the 'raindrop' curvature found in your story, 
+            > merging it with a star-burst setting to symbolize Seattle stargazing."
+            """)
