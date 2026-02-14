@@ -1,176 +1,136 @@
 import streamlit as st
 import time
-import random
 
-# --- PAGE CONFIG ---
+# --- CONFIG ---
 st.set_page_config(page_title="Avenir | High Jewelry", page_icon="✨", layout="wide")
+
+# --- INITIALIZING SESSION STATE ---
+# This ensures the image and chat stay active when the user interacts
+if 'forged' not in st.session_state:
+    st.session_state.forged = False
+if 'chat_mode' not in st.session_state:
+    st.session_state.chat_mode = False
+if 'image_url' not in st.session_state:
+    st.session_state.image_url = ""
 
 # --- REGAL GOLD & WHITE CSS ---
 st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Playfair+Display:ital,wght@0,400;1,700&family=Inter:wght@200;400&display=swap');
 
-    /* Pure White Canvas */
-    .stApp {
-        background-color: #ffffff;
-        color: #1a1a1a;
-        font-family: 'Inter', sans-serif;
+    .stApp { background-color: #ffffff; color: #1a1a1a; font-family: 'Inter', sans-serif; }
+
+    /* Hero Banner Picture */
+    .hero-banner {
+        width: 100%;
+        height: 300px;
+        background-image: url('https://images.unsplash.com/photo-1515377905703-c4788e51af15?q=80&w=2000');
+        background-size: cover;
+        background-position: center;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 50px;
+        border-bottom: 3px solid #b38728;
     }
 
-    /* Avenir Gold Header */
     .avenir-logo {
         font-family: 'Cinzel', serif;
+        color: #ffffff;
         background: linear-gradient(to bottom, #c5a059 0%, #f1d38e 50%, #b38728 100%);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
-        font-size: 5.5rem;
-        text-align: center;
+        font-size: 6rem;
         font-weight: 700;
-        letter-spacing: 15px;
-        margin-top: 40px;
-        margin-bottom: 0px;
+        letter-spacing: 20px;
         text-transform: uppercase;
+        filter: drop-shadow(0 5px 15px rgba(0,0,0,0.3));
     }
 
-    .tagline {
-        text-align: center;
-        font-family: 'Playfair Display', serif;
-        font-style: italic;
-        letter-spacing: 3px;
-        color: #b38728; /* Solid Gold Color */
-        font-size: 0.9rem;
-        margin-bottom: 50px;
-    }
-
-    /* Regal Card Styling */
-    .atelier-box {
-        background: #ffffff;
+    /* Input Section */
+    .atelier-input-container {
+        background: #fdfaf4;
+        padding: 40px;
         border: 1px solid #f1d38e;
-        padding: 60px;
-        border-radius: 0px;
-        box-shadow: 0 10px 50px rgba(179, 135, 40, 0.1);
-        margin-bottom: 40px;
+        margin-top: -80px; /* Overlap effect */
+        position: relative;
+        z-index: 10;
+        box-shadow: 0 20px 40px rgba(0,0,0,0.05);
     }
 
-    /* Gold Action Button */
+    /* Buttons */
     div.stButton > button {
         background: linear-gradient(45deg, #b38728 0%, #f1d38e 100%);
         color: #ffffff !important;
         border: none;
         border-radius: 0px;
-        padding: 18px 45px;
+        padding: 15px 45px;
         font-family: 'Cinzel', serif;
         letter-spacing: 3px;
-        font-size: 0.9rem;
         font-weight: bold;
-        transition: all 0.5s ease;
         width: 100%;
-        margin-top: 20px;
-        cursor: pointer;
+        transition: 0.4s;
     }
 
-    div.stButton > button:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 15px 30px rgba(179, 135, 40, 0.3);
-        color: #ffffff !important;
-    }
-
-    /* Concierge Chatbox Styling */
-    .concierge-card {
-        background: #fdfaf4; /* Subtle warm cream */
-        border-top: 2px solid #b38728;
-        padding: 30px;
-        margin-top: 20px;
-        border-radius: 4px;
-    }
-
-    .concierge-title {
-        font-family: 'Cinzel', serif;
-        color: #b38728;
-        font-size: 1rem;
-        margin-bottom: 15px;
-        letter-spacing: 2px;
-    }
-
-    .proposal-text {
+    /* Chat Bubbles */
+    .chat-container {
+        background: #f9f9f9;
+        padding: 20px;
+        border: 1px solid #eee;
+        height: 300px;
+        overflow-y: auto;
+        margin-bottom: 10px;
         font-family: 'Playfair Display', serif;
-        font-size: 1.3rem;
-        line-height: 1.6;
-        color: #333;
-        font-style: italic;
     }
-
-    /* Form Inputs */
-    .stTextArea textarea {
-        border: 1px solid #f1d38e !important;
-        background-color: #fff !important;
-    }
+    
+    .stTextArea textarea { border: 1px solid #f1d38e !important; }
     </style>
     """, unsafe_allow_html=True)
 
-# --- HEADER ---
-st.markdown('<p class="avenir-logo">Avenir</p>', unsafe_allow_html=True)
-st.markdown('<p class="tagline">The Art of the Heirloom</p>', unsafe_allow_html=True)
+# --- HERO BANNER ---
+st.markdown('<div class="hero-banner"><p class="avenir-logo">Avenir</p></div>', unsafe_allow_html=True)
 
-# --- THE ATELIER FORM ---
+# --- INPUT AREA ---
 with st.container():
-    st.markdown('<div class="atelier-box">', unsafe_allow_html=True)
+    st.markdown('<div class="atelier-input-container">', unsafe_allow_html=True)
+    col_input, col_opt = st.columns([2, 1])
     
-    with st.form("avenir_atelier_v2"):
-        col1, col2 = st.columns([1.6, 1])
-        
-        with col1:
-            st.markdown("<p style='color:#b38728; font-family:Cinzel;'>The Narrative</p>", unsafe_allow_html=True)
-            story_input = st.text_area("", placeholder="Recount the story that defines your bond...", height=170, label_visibility="collapsed")
-        
-        with col2:
-            st.markdown("<p style='color:#b38728; font-family:Cinzel;'>The Essence</p>", unsafe_allow_html=True)
-            p_style = st.selectbox("Form Factor", ["Classical Solitaire", "Art Deco Halo", "Modernist Band"])
-            metal_choice = st.selectbox("Metal Finish", ["18k Yellow Gold", "Brushed Champagne Gold", "Antique Vermeil"])
-            
-            submit_forge = st.form_submit_button("FORGE YOUR DESIGN")
-            
+    with col_input:
+        story_text = st.text_area("THE NARRATIVE", placeholder="Share your story...", height=150)
+    with col_opt:
+        metal = st.selectbox("Metal Selection", ["Satin White Gold", "18k Champagne Gold", "Polished Platinum"])
+        if st.button("FORGE PIECE"):
+            if story_text:
+                st.session_state.forged = True
+                # Generating a unique high-res image link (Simulating DALL-E)
+                st.session_state.image_url = f"https://picsum.photos/seed/{len(story_text) + time.time()}/1000/1000"
     st.markdown('</div>', unsafe_allow_html=True)
 
-# --- DYNAMIC REVEAL ---
-if submit_forge:
-    if not story_input:
-        st.error("The Atelier requires a story to begin the distillation process.")
-    else:
-        with st.spinner("Distilling memories into gold..."):
-            time.sleep(2) # Simulated processing
+# --- DYNAMIC RESULTS ---
+if st.session_state.forged:
+    st.markdown("---")
+    res_left, res_right = st.columns([1, 1])
+    
+    with res_left:
+        st.image(st.session_state.image_url, caption="PROTOTYPE DESIGN", use_container_width=True)
+    
+    with res_right:
+        if not st.session_state.chat_mode:
+            st.markdown("### <span style='color:#b38728; font-family:Cinzel;'>The Reveal</span>", unsafe_allow_html=True)
+            st.write("Your design has been calculated. The next step is the moment of presentation.")
+            if st.button("BOOK PRIVATE CONSULTATION"):
+                st.session_state.chat_mode = True
+                st.rerun()
+        else:
+            # --- AI CHATBOT INTERFACE ---
+            st.markdown("### <span style='color:#b38728; font-family:Cinzel;'>Concierge Chat</span>", unsafe_allow_html=True)
+            st.markdown('<div class="chat-container"><i>Avenir Concierge:</i> "I am here to help you plan the perfect proposal. Based on your story, would you like to discuss the location or the words you will say?"</div>', unsafe_allow_html=True)
             
-            st.markdown("---")
-            res_left, res_right = st.columns([1, 1.2])
+            chat_input = st.text_input("Speak with your consultant...")
+            if chat_input:
+                st.toast("Processing your request...", icon="✨")
+                # Here you would typically append the user message to a list in session_state
             
-            with res_left:
-                # Forces a fresh image every click by using time as a seed
-                unique_id = int(time.time())
-                st.image(f"https://picsum.photos/seed/{unique_id}/1000/1000", 
-                         caption=f"Handcrafted Design for: {p_style}", 
-                         use_container_width=True)
-            
-            with res_right:
-                st.markdown(f"### <span style='color:#b38728; font-family:Cinzel;'>The Proposal Plan</span>", unsafe_allow_html=True)
-                
-                # Dynamic Proposal Helper logic
-                st.markdown(f"""
-                <div class="concierge-card">
-                    <div class="concierge-title">THE CONCIERGE'S ADVICE</div>
-                    <p class="proposal-text">
-                    "Your memory of {story_input[:40]}... suggests a bond of profound depth. 
-                    Present this {p_style} in a setting of complete stillness—perhaps a sunrise hike or a quiet library. 
-                    <br><br>
-                    <strong>Your Script:</strong><br>
-                    'This {metal_choice} piece was forged from the story of us. Just as this design is one-of-a-kind, 
-                    my life has been uniquely transformed by you. Will you continue this story with me?'"
-                    </p>
-                </div>
-                """, unsafe_allow_html=True)
-                
-                st.markdown("---")
-                st.markdown("<p style='letter-spacing:2px; font-size:0.8rem; color:#888;'>CERTIFIED BY AVENIR ATELIER | 2026</p>", unsafe_allow_html=True)
-                
-                if st.button("BOOK A PRIVATE CONSULTATION"):
-                    st.balloons()
-                    st.success("Your request has been sent to our master jeweler.")
+            if st.button("← BACK TO SPECS"):
+                st.session_state.chat_mode = False
+                st.rerun()
